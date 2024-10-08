@@ -2,8 +2,8 @@ use std::str::from_utf8;
 
 use bytes::{Buf, Bytes};
 use memchr::memchr;
-
-use crate::{err_protocol, Error};
+use rbs::err_protocol;
+use crate::{Error};
 
 pub trait BufExt: Buf {
     // Read a nul-terminated byte sequence

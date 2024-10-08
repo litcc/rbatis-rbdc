@@ -122,18 +122,18 @@ impl Encode for Value {
                     //Date = "1993-02-06"
                     "Date" => Date(fastdate::Date::from_str(
                         &v.into_string().unwrap_or_default(),
-                    )?)
+                    ).map_err(|e|Error::from(e.to_string()))?)
                     .encode(buf),
                     //RFC3339NanoTime = "15:04:05.999999999"
                     "Time" => Time(fastdate::Time::from_str(
                         &v.into_string().unwrap_or_default(),
-                    )?)
+                    ).map_err(|e|Error::from(e.to_string()))?)
                     .encode(buf),
                     //RFC3339 = "2006-01-02 15:04:05.999999"
                     "Timestamp" => Timestamp(v.as_i64().unwrap_or_default()).encode(buf),
                     "DateTime" => DateTime(fastdate::DateTime::from_str(
                         &v.into_string().unwrap_or_default(),
-                    )?)
+                    ).map_err(|e|Error::from(e.to_string()))?)
                     .encode(buf),
                     "Json" => {
                         let json_str = v.into_string().unwrap_or_default();
@@ -177,7 +177,7 @@ impl Decode for Value {
                 "Timestamp",
                 Box::new(Value::U64({
                     let s = decode_timestamp(v).unwrap_or_default();
-                    let date = fastdate::DateTime::from_str(&s)?;
+                    let date = fastdate::DateTime::from_str(&s).map_err(|e|Error::from(e.to_string()))?;
                     date.unix_timestamp_millis() as u64
                 })),
             ),

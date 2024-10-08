@@ -42,7 +42,7 @@ impl Decode for Time {
                     hour: t.hour(),
                 }))
             }
-            PgValueFormat::Text => Ok(Time(fastdate::Time::from_str(value.as_str()?)?)),
+            PgValueFormat::Text => Ok(Time(fastdate::Time::from_str(value.as_str()?).map_err(|e|Error::from(e.to_string()))?)),
         }
     }
 }
