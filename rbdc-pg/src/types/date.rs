@@ -37,7 +37,7 @@ impl Decode for fastdate::Date {
             }
 
             PgValueFormat::Text => {
-                let dt = fastdate::DateTime::from_str(&format!("{}T00:00:00Z", value.as_str()?))?;
+                let dt = fastdate::DateTime::from_str(&format!("{}T00:00:00Z", value.as_str()?)).map_err(|e|Error::from(e.to_string()))?;
                 fastdate::Date::from(dt)
             }
         })

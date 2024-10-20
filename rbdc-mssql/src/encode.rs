@@ -62,7 +62,7 @@ impl Encode for Value {
                     Ok(())
                 }
                 "DateTime" => {
-                    let date = fastdate::DateTime::from_str(&v.as_str().unwrap_or_default())?;
+                    let date = fastdate::DateTime::from_str(&v.as_str().unwrap_or_default()).map_err(|e|Error::from(e.to_string()))?;
                     q.bind(
                         chrono::NaiveDateTime::from_str(&date.display(false))
                             .map_err(|e| Error::from(e.to_string()))?,

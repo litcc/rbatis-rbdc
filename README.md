@@ -5,4 +5,4 @@ RBDC driver abstract
 
 ### how to define my driver to support rbdc driver?
 should impl trait and load driver
-* impl trait rbdc::db::{Driver, MetaData, Row, Connection, ConnectOptions, Placeholder};
+* impl trait `rbdc::db::{Driver, MetaData, Row, Connection, ConnectOptions, Placeholder};`

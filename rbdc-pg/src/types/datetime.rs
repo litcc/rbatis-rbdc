@@ -52,7 +52,7 @@ impl Decode for DateTime {
             }
             PgValueFormat::Text => {
                 let s = value.as_str()?;
-                let date = fastdate::DateTime::from_str(s)?;
+                let date = fastdate::DateTime::from_str(s).map_err(|e|Error::from(e.to_string()))?;
                 DateTime(date)
             }
         })

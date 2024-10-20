@@ -1,5 +1,5 @@
 use crate::Error;
-use bigdecimal::{BigDecimal, ParseBigDecimalError};
+use bigdecimal::{BigDecimal};
 use rbs::Value;
 use serde::Deserializer;
 use std::cmp::Ordering;
@@ -52,15 +52,10 @@ impl FromStr for Decimal {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Decimal(BigDecimal::from_str(&s)?))
+        Ok(Decimal(BigDecimal::from_str(&s).map_err(|e|Error::from(e.to_string()))?))
     }
 }
 
-impl From<ParseBigDecimalError> for Error {
-    fn from(value: ParseBigDecimalError) -> Self {
-        Error::from(value.to_string())
-    }
-}
 
 impl Deref for Decimal {
     type Target = BigDecimal;

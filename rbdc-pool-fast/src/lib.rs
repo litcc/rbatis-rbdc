@@ -194,6 +194,84 @@ impl Connection for ConnManagerProxy {
 
 #[cfg(test)]
 mod test {
+    use futures_core::future::BoxFuture;
+    use rbs::{Error, Value};
+    use rbdc::db::{ConnectOptions, Connection, Driver, ExecResult, Row};
+    use rbdc::pool::conn_manager::ConnManager;
+    use rbdc::pool::Pool;
+    use crate::FastPool;
+
+
+    #[derive(Debug)]
+    pub struct Opt{}
+    impl ConnectOptions for Opt{
+        fn connect(&self) -> BoxFuture<Result<Box<dyn Connection>, Error>> {
+            Box::pin(async{
+                Ok(Box::new(Conn{}) as Box<dyn Connection>)
+            })
+        }
+
+        fn set_uri(&mut self, _uri: &str) -> Result<(), Error> {
+             Ok(())
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct Conn{}
+
+    impl Connection for Conn{
+        fn get_rows(&mut self, _sql: &str, _params: Vec<Value>) -> BoxFuture<Result<Vec<Box<dyn Row>>, Error>> {
+            Box::pin(async{
+                Ok(vec![])
+            })
+        }
+
+        fn exec(&mut self, _sql: &str, _params: Vec<Value>) -> BoxFuture<Result<ExecResult, Error>> {
+            Box::pin(async{
+                Ok(ExecResult::default())
+            })
+        }
+
+        fn ping(&mut self) -> BoxFuture<Result<(), Error>> {
+            Box::pin(async{
+            Ok(())
+            })
+        }
+
+        fn close(&mut self) -> BoxFuture<Result<(), Error>> {
+            Box::pin(async{
+                Ok(())
+            })
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct D{}
+    impl Driver for D{
+        fn name(&self) -> &str {
+            "d"
+        }
+
+        fn connect(&self, _url: &str) -> BoxFuture<Result<Box<dyn Connection>, Error>> {
+            Box::pin(async{
+                Ok(Box::new(Conn{}) as Box<dyn Connection>)
+            })
+        }
+
+        fn connect_opt<'a>(&'a self, _opt: &'a dyn ConnectOptions) -> BoxFuture<'a, Result<Box<dyn Connection>, Error>> {
+            Box::pin(async{
+                Ok(Box::new(Conn{}) as Box<dyn Connection>)
+            })
+        }
+
+        fn default_option(&self) -> Box<dyn ConnectOptions> {
+            Box::new(Opt{})
+        }
+    }
+
     #[test]
-    fn test() {}
+    fn test() {
+        let pool = Box::new(FastPool::new(ConnManager::new(D{},"").unwrap()));
+        println!("ok={}",pool.is_ok());
+    }
 }
