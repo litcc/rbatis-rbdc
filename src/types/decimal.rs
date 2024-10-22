@@ -200,4 +200,11 @@ mod test {
         let rv: Decimal = serde_json::from_value(serde_json::to_value(v1).unwrap()).unwrap();
         assert_eq!(rv, Decimal::from_str("1").unwrap());
     }
+
+    #[test]
+    fn test_ser3() {
+        let v1 = to_value!("1.111");
+        let rv: Decimal = rbs::from_value(v1.clone()).unwrap();
+        assert_eq!(rv, Decimal::from_str("1.111").unwrap());
+    }
 }
