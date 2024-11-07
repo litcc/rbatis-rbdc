@@ -33,6 +33,29 @@ impl Decimal {
             }
         }
     }
+
+    ///Return a new BigDecimal object equivalent to self,
+    /// with internal scaling set to the number specified.
+    /// If the new_scale is lower than the current value (indicating a larger power of 10),
+    /// digits will be dropped (as precision is lower)
+    pub fn with_scale(self, arg: i64) -> Self {
+        Decimal(self.0.with_scale(arg))
+    }
+
+    ///Return a new Decimal object with precision set to new value
+    /// let n: Decimal = "129.41675".parse().unwrap();
+    ///
+    /// assert_eq!(n.with_prec(2),  "130".parse().unwrap());
+    ///
+    /// let n_p12 = n.with_prec(12);
+    /// let (i, scale) = n_p12.as_bigint_and_exponent();
+    /// assert_eq!(n_p12, "129.416750000".parse().unwrap());
+    /// assert_eq!(i, 129416750000_u64.into());
+    /// assert_eq!(scale, 9);
+    ///
+    pub fn with_prec(self, arg: u64) -> Self {
+        Decimal(self.0.with_prec(arg))
+    }
 }
 
 impl<'de> serde::Deserialize<'de> for Decimal {
@@ -254,5 +277,21 @@ mod test {
         let v1 = to_value!("1.111");
         let rv: Decimal = rbs::from_value(v1.clone()).unwrap();
         assert_eq!(rv, Decimal::from_str("1.111").unwrap());
+    }
+
+    #[test]
+    fn test_with_scale() {
+        let v1 = Decimal::new("1.123456").unwrap();
+        let v = v1.with_scale(2);
+        println!("{}", v.to_string());
+        assert_eq!(v.to_string(),"1.12");
+    }
+
+    #[test]
+    fn test_with_prec() {
+        let v1 = Decimal::new("1.123456").unwrap();
+        let v = v1.with_prec(2);
+        println!("{}", v.to_string());
+        assert_eq!(v.to_string(),"1.1");
     }
 }
