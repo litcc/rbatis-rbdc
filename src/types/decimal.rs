@@ -294,4 +294,10 @@ mod test {
         println!("{}", v.to_string());
         assert_eq!(v.to_string(),"1.1");
     }
+
+    #[test]
+    fn test_parse() {
+        let v1 = "1.123456".parse::<Decimal>().unwrap();
+        assert_eq!(v1.to_string(),"1.123456");
+    }
 }
