@@ -1,5 +1,5 @@
 use crate::Error;
-use bigdecimal::{BigDecimal};
+use bigdecimal::{BigDecimal, FromPrimitive};
 use rbs::Value;
 use serde::Deserializer;
 use std::cmp::Ordering;
@@ -13,7 +13,25 @@ pub struct Decimal(pub BigDecimal);
 
 impl Decimal {
     pub fn new(arg: &str) -> Result<Self, Error> {
-        return Decimal::from_str(arg);
+        Decimal::from_str(arg)
+    }
+
+    pub fn from_f64(arg: f64) -> Option<Decimal> {
+        match BigDecimal::from_f64(arg) {
+            None => { None }
+            Some(v) => {
+                Some(Decimal::from(v))
+            }
+        }
+    }
+
+    pub fn from_f32(arg: f32) -> Option<Decimal> {
+        match BigDecimal::from_f32(arg) {
+            None => { None }
+            Some(v) => {
+                Some(Decimal::from(v))
+            }
+        }
     }
 }
 
@@ -42,9 +60,39 @@ impl Debug for Decimal {
     }
 }
 
+impl From<BigDecimal> for Decimal {
+    fn from(value: BigDecimal) -> Self {
+        Self(value)
+    }
+}
 impl From<Decimal> for Value {
     fn from(arg: Decimal) -> Self {
         Value::Ext("Decimal", Box::new(Value::String(arg.0.to_string())))
+    }
+}
+
+
+impl From<i32> for Decimal {
+    fn from(arg: i32) -> Self {
+        Self::from(BigDecimal::from(arg))
+    }
+}
+
+impl From<u32> for Decimal {
+    fn from(arg: u32) -> Self {
+        Self::from(BigDecimal::from(arg))
+    }
+}
+
+impl From<i64> for Decimal {
+    fn from(arg: i64) -> Self {
+        Self::from(BigDecimal::from(arg))
+    }
+}
+
+impl From<u64> for Decimal {
+    fn from(arg: u64) -> Self {
+        Self::from(BigDecimal::from(arg))
     }
 }
 
@@ -52,7 +100,7 @@ impl FromStr for Decimal {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Decimal(BigDecimal::from_str(&s).map_err(|e|Error::from(e.to_string()))?))
+        Ok(Decimal(BigDecimal::from_str(&s).map_err(|e| Error::from(e.to_string()))?))
     }
 }
 
