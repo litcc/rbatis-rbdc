@@ -327,7 +327,7 @@ impl SqliteConnectOptions {
     ///
     /// If you do end up needing to set this to `true` for some reason, please
     /// [open an issue](https://github.com/rbatis/rbatis/issues/new/choose) as this may indicate
-    /// a concurrency bug in SQLx. Please provide clear instructions for reproducing the issue,
+    /// a concurrency bug in rbdc. Please provide clear instructions for reproducing the issue,
     /// including a sample database schema if applicable.
     pub fn serialized(mut self, serialized: bool) -> Self {
         self.serialized = serialized;
