@@ -14,9 +14,14 @@ impl Driver for SqliteDriver {
     fn connect(&self, url: &str) -> BoxFuture<Result<Box<dyn Connection>, Error>> {
         let url = url.to_owned();
         Box::pin(async move {
-            let opt: SqliteConnectOptions = url.parse()?;
-            let conn = opt.connect().await?;
-            Ok(Box::new(conn) as Box<dyn Connection>)
+            let mut opt = self.default_option();
+            opt.set_uri(&url)?;
+            if let Some(opt) = opt.downcast_ref::<SqliteConnectOptions>() {
+                let conn = opt.connect().await?;
+                Ok(Box::new(conn) as Box<dyn Connection>)
+            } else {
+                Err(Error::from("downcast_ref failure"))
+            }
         })
     }
 
