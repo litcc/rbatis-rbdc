@@ -13,7 +13,7 @@ async fn main(){
         .get_values("SELECT 1", vec![])
         .await
         .unwrap();
-    for mut x in data {
+    for x in data {
         println!("row: {}", x);
     }
 }
