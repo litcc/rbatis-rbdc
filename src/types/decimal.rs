@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::Error;
 use bigdecimal::{BigDecimal, FromPrimitive};
 use rbs::Value;
@@ -15,25 +17,43 @@ impl Decimal {
     pub fn new(arg: &str) -> Result<Self, Error> {
         Decimal::from_str(arg)
     }
-
+    #[inline]
     pub fn from_f64(arg: f64) -> Option<Decimal> {
         match BigDecimal::from_f64(arg) {
-            None => { None }
-            Some(v) => {
-                Some(Decimal::from(v))
-            }
+            None => None,
+            Some(v) => Some(Decimal::from(v)),
         }
     }
-
+    
+    #[inline]
     pub fn from_f32(arg: f32) -> Option<Decimal> {
         match BigDecimal::from_f32(arg) {
-            None => { None }
-            Some(v) => {
-                Some(Decimal::from(v))
-            }
+            None => None,
+            Some(v) => Some(Decimal::from(v)),
         }
     }
 
+    #[inline]
+    fn from_i64(n: i64) -> Option<Self> {
+        Some(Decimal::from(n))
+    }
+
+    #[inline]
+    fn from_u64(n: u64) -> Option<Self> {
+        Some(Decimal::from(n))
+    }
+
+    #[inline]
+    fn from_i128(n: i128) -> Option<Self> {
+        Some(Decimal::from(n))
+    }
+
+    #[inline]
+    fn from_u128(n: u128) -> Option<Self> {
+        Some(Decimal::from(n))
+    }
+
+   
     ///Return a new Decimal object equivalent to self,
     /// with internal scaling set to the number specified.
     /// If the new_scale is lower than the current value (indicating a larger power of 10),
@@ -94,7 +114,6 @@ impl From<Decimal> for Value {
     }
 }
 
-
 impl From<i32> for Decimal {
     fn from(arg: i32) -> Self {
         Self::from(BigDecimal::from(arg))
@@ -119,14 +138,48 @@ impl From<u64> for Decimal {
     }
 }
 
+impl From<i128> for Decimal {
+    fn from(arg: i128) -> Self {
+        Self::from(BigDecimal::from(arg))
+    }
+}
+
+
+impl From<u128> for Decimal {
+    fn from(arg: u128) -> Self {
+        Self::from(BigDecimal::from(arg))
+    }
+}
+
+impl TryFrom<f32> for Decimal {
+    type Error = Error;
+
+    fn try_from(value: f32) -> Result<Self, Error> {
+        Ok(Self(
+            BigDecimal::try_from(value).map_err(|e| Error::from(e.to_string()))?,
+        ))
+    }
+}
+
+impl TryFrom<f64> for Decimal {
+    type Error = Error;
+
+    fn try_from(value: f64) -> Result<Self, Error> {
+        Ok(Self(
+            BigDecimal::try_from(value).map_err(|e| Error::from(e.to_string()))?,
+        ))
+    }
+}
+
 impl FromStr for Decimal {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Decimal(BigDecimal::from_str(&s).map_err(|e| Error::from(e.to_string()))?))
+        Ok(Decimal(
+            BigDecimal::from_str(&s).map_err(|e| Error::from(e.to_string()))?,
+        ))
     }
 }
-
 
 impl Deref for Decimal {
     type Target = BigDecimal;
@@ -284,7 +337,7 @@ mod test {
         let v1 = Decimal::new("1.123456").unwrap();
         let v = v1.with_scale(2);
         println!("{}", v.to_string());
-        assert_eq!(v.to_string(),"1.12");
+        assert_eq!(v.to_string(), "1.12");
     }
 
     #[test]
@@ -292,12 +345,34 @@ mod test {
         let v1 = Decimal::new("1.123456").unwrap();
         let v = v1.with_prec(2);
         println!("{}", v.to_string());
-        assert_eq!(v.to_string(),"1.1");
+        assert_eq!(v.to_string(), "1.1");
     }
 
     #[test]
     fn test_parse() {
         let v1 = "1.123456".parse::<Decimal>().unwrap();
-        assert_eq!(v1.to_string(),"1.123456");
+        assert_eq!(v1.to_string(), "1.123456");
+    }
+
+    #[test]
+    fn test_from() {
+        let v = Decimal::from_i64(1);
+        assert_eq!(v, Some(Decimal::from(1)));
+        let v = Decimal::from_u64(1);
+        assert_eq!(v, Some(Decimal::from(1)));
+        let v = Decimal::from_i128(1);
+        assert_eq!(v, Some(Decimal::from(1)));
+        let v = Decimal::from_u128(1);
+        assert_eq!(v, Some(Decimal::from(1)));
+    }
+    
+    #[test]
+    fn test_try_from_f64() {
+        let f=1.1;
+        let v = Decimal::from_f64(f);
+        println!("{:?}",v);  
+        if let Some(v)=v{
+            println!("{}",v.to_string());
+        }
     }
 }
