@@ -149,7 +149,7 @@ pub enum PgTypeKind {
 }
 
 impl PgTypeInfo {
-    /// Returns the corresponding `PgTypeInfo` if the OID is a built-in type and recognized by SQLx.
+    /// Returns the corresponding `PgTypeInfo` if the OID is a built-in type and recognized by rbdc.
     pub(crate) fn try_from_oid(oid: Oid) -> Option<Self> {
         PgType::try_from_oid(oid).map(Self)
     }
@@ -228,7 +228,7 @@ impl PgTypeInfo {
 // SELECT oid, typarray FROM pg_type where typname = '<type name>'
 
 impl PgType {
-    /// Returns the corresponding `PgType` if the OID is a built-in type and recognized by SQLx.
+    /// Returns the corresponding `PgType` if the OID is a built-in type and recognized by rbdc.
     pub(crate) fn try_from_oid(oid: Oid) -> Option<Self> {
         Some(match oid.0 {
             16 => PgType::Bool,

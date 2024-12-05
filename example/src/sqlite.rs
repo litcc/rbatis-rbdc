@@ -1,3 +1,5 @@
+mod mssql;
+
 use rbdc_sqlite::SqliteDriver;
 use rbdc::db::{Connection};
 use rbdc::Error;

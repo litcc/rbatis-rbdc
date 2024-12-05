@@ -9,7 +9,7 @@ use rbdc::{err_protocol, Error};
 ///
 /// # Note
 ///
-/// The EOF packet is deprecated as of MySQL 5.7.5. SQLx only uses this packet for MySQL
+/// The EOF packet is deprecated as of MySQL 5.7.5. rbdc only uses this packet for MySQL
 /// prior MySQL versions.
 #[derive(Debug)]
 pub struct EofPacket {

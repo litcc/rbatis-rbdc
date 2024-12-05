@@ -26,7 +26,7 @@ pub use worker::Command;
 
 /// A connection to an open [Sqlite] database.
 ///
-/// Because SQLite is an in-process database accessed by blocking API calls, SQLx uses a background
+/// Because SQLite is an in-process database accessed by blocking API calls, rbdc uses a background
 /// thread and communicates with it via channels to allow non-blocking access to the database.
 ///
 /// Dropping this struct will signal the worker thread to quit and close the database, though

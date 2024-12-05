@@ -52,9 +52,15 @@ impl ConnectOptions for MssqlConnectOptions {
     }
 
     fn set_uri(&mut self, url: &str) -> Result<(), Error> {
-        *self = MssqlConnectOptions(
-            Config::from_jdbc_string(url).map_err(|e| Error::from(e.to_string()))?,
-        );
+        if url.contains("jdbc"){
+            let mut config = Config::from_jdbc_string(url).map_err(|e| Error::from(e.to_string()))?;
+            config.trust_cert();
+            *self = MssqlConnectOptions(config);   
+        }else{
+            let mut config = Config::from_ado_string(url).map_err(|e| Error::from(e.to_string()))?;
+            config.trust_cert();
+            *self = MssqlConnectOptions(config);
+        }
         Ok(())
     }
 }
