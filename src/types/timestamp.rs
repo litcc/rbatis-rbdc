@@ -2,7 +2,6 @@ use crate::{DateTime, Error};
 use rbs::Value;
 use serde::Deserializer;
 use std::fmt::{Debug, Display, Formatter};
-use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 /// Timestamp(timestamp_millis:u64)
@@ -69,20 +68,6 @@ impl From<Timestamp> for fastdate::DateTime {
 impl Default for Timestamp {
     fn default() -> Self {
         Timestamp(0)
-    }
-}
-
-impl Deref for Timestamp {
-    type Target = i64;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Timestamp {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }
 

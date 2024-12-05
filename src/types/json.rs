@@ -1,6 +1,5 @@
 use rbs::Value;
 use std::fmt::{Debug, Display, Formatter};
-use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -206,19 +205,6 @@ impl<'de, T: Serialize + serde::de::DeserializeOwned> Deserialize<'de> for JsonV
     }
 }
 
-impl<T: Serialize + serde::de::DeserializeOwned> Deref for JsonV<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<T: Serialize + serde::de::DeserializeOwned> DerefMut for JsonV<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
 
 impl<T: Serialize + serde::de::DeserializeOwned + Display> Display for JsonV<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

@@ -4,7 +4,7 @@ use rbs::Value;
 use serde::Deserializer;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
-use std::ops::{Add, AddAssign, Deref, DerefMut, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 use std::str::FromStr;
 
 #[derive(serde::Serialize, Clone, Eq, PartialEq, Hash)]
@@ -124,21 +124,6 @@ impl FromStr for Decimal {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Decimal(BigDecimal::from_str(&s).map_err(|e| Error::from(e.to_string()))?))
-    }
-}
-
-
-impl Deref for Decimal {
-    type Target = BigDecimal;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Decimal {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }
 

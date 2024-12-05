@@ -5,7 +5,7 @@ use rbs::Value;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::cmp;
 use std::fmt::{Debug, Display, Formatter};
-use std::ops::{Add, Deref, DerefMut, Sub};
+use std::ops::{Add, Sub};
 use std::str::FromStr;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -61,20 +61,6 @@ impl<'de> Deserialize<'de> for DateTime {
                 )));
             }
         }
-    }
-}
-
-impl Deref for DateTime {
-    type Target = fastdate::DateTime;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for DateTime {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }
 
