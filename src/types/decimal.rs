@@ -1,10 +1,12 @@
+#![allow(dead_code)]
+
 use crate::Error;
 use bigdecimal::{BigDecimal, FromPrimitive};
 use rbs::Value;
 use serde::Deserializer;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
-use std::ops::{Add, AddAssign, Deref, DerefMut, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 use std::str::FromStr;
 
 #[derive(serde::Serialize, Clone, Eq, PartialEq, Hash)]
