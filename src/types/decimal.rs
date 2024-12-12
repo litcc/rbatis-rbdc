@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::Error;
-use bigdecimal::{BigDecimal, FromPrimitive};
+use bigdecimal::{BigDecimal, FromPrimitive, ToPrimitive};
 use rbs::Value;
 use serde::Deserializer;
 use std::cmp::Ordering;
@@ -178,6 +178,25 @@ impl FromStr for Decimal {
         Ok(Decimal(
             BigDecimal::from_str(&s).map_err(|e| Error::from(e.to_string()))?,
         ))
+    }
+}
+
+impl ToPrimitive for Decimal{
+    fn to_i64(&self) -> Option<i64> {
+        self.0.to_i64()
+    }
+    fn to_i128(&self) -> Option<i128> {
+        self.0.to_i128()
+    }
+    fn to_u64(&self) -> Option<u64> {
+        self.0.to_u64()
+    }
+    fn to_u128(&self) -> Option<u128> {
+        self.0.to_u128()
+    }
+
+    fn to_f64(&self) -> Option<f64> {
+        self.0.to_f64()
     }
 }
 
