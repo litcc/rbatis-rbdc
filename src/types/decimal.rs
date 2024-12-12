@@ -53,7 +53,6 @@ impl Decimal {
         Some(Decimal::from(n))
     }
 
-
     ///Return a new Decimal object equivalent to self,
     /// with internal scaling set to the number specified.
     /// If the new_scale is lower than the current value (indicating a larger power of 10),
@@ -144,7 +143,6 @@ impl From<i128> for Decimal {
     }
 }
 
-
 impl From<u128> for Decimal {
     fn from(arg: u128) -> Self {
         Self::from(BigDecimal::from(arg))
@@ -181,7 +179,7 @@ impl FromStr for Decimal {
     }
 }
 
-impl ToPrimitive for Decimal{
+impl ToPrimitive for Decimal {
     fn to_i64(&self) -> Option<i64> {
         self.0.to_i64()
     }
@@ -197,6 +195,38 @@ impl ToPrimitive for Decimal{
 
     fn to_f64(&self) -> Option<f64> {
         self.0.to_f64()
+    }
+}
+
+impl FromPrimitive for Decimal {
+    #[inline]
+    fn from_i64(n: i64) -> Option<Self> {
+        Some(Self::from(BigDecimal::from_i64(n)?))
+    }
+
+    #[inline]
+    fn from_u64(n: u64) -> Option<Self> {
+        Some(Self::from(BigDecimal::from_u64(n)?))
+    }
+
+    #[inline]
+    fn from_i128(n: i128) -> Option<Self> {
+        Some(Self::from(BigDecimal::from_i128(n)?))
+    }
+
+    #[inline]
+    fn from_u128(n: u128) -> Option<Self> {
+        Some(Self::from(BigDecimal::from_u128(n)?))
+    }
+
+    #[inline]
+    fn from_f32(n: f32) -> Option<Self> {
+        Some(Self::from(BigDecimal::from_f32(n)?))
+    }
+
+    #[inline]
+    fn from_f64(n: f64) -> Option<Self> {
+        Some(Self::from(BigDecimal::from_f64(n)?))
     }
 }
 
@@ -373,11 +403,11 @@ mod test {
 
     #[test]
     fn test_try_from_f64() {
-        let f=1.1;
+        let f = 1.1;
         let v = Decimal::from_f64(f);
-        println!("{:?}",v);
-        if let Some(v)=v{
-            println!("{}",v.to_string());
+        println!("{:?}", v);
+        if let Some(v) = v {
+            println!("{}", v.to_string());
         }
     }
 }
