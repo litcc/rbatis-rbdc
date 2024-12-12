@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-
 use crate::Error;
 use bigdecimal::{BigDecimal, FromPrimitive, ToPrimitive};
 use rbs::Value;
@@ -8,6 +7,8 @@ use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 use std::str::FromStr;
+
+pub type RoundingMode = bigdecimal::RoundingMode;
 
 #[derive(serde::Serialize, Clone, Eq, PartialEq, Hash)]
 #[serde(rename = "Decimal")]
@@ -19,6 +20,7 @@ impl Decimal {
     }
     #[inline]
     pub fn from_f64(arg: f64) -> Option<Decimal> {
+        use bigdecimal::FromPrimitive;
         match BigDecimal::from_f64(arg) {
             None => None,
             Some(v) => Some(Decimal::from(v)),
@@ -27,6 +29,7 @@ impl Decimal {
 
     #[inline]
     pub fn from_f32(arg: f32) -> Option<Decimal> {
+        use bigdecimal::FromPrimitive;
         match BigDecimal::from_f32(arg) {
             None => None,
             Some(v) => Some(Decimal::from(v)),
@@ -74,6 +77,24 @@ impl Decimal {
     ///
     pub fn with_prec(self, arg: u64) -> Self {
         Decimal(self.0.with_prec(arg))
+    }
+
+    ///Return given number rounded to 'round_digits' precision after the decimal point, using default rounding mode
+    /// Default rounding mode is HalfEven, but can be configured at compile-time by the environment variable: RUST_BIGDECIMAL_DEFAULT_ROUNDING_MODE (or by patching build. rs )
+    pub fn round(self, round_digits: i64) -> Self {
+        Decimal(self.0.round(round_digits))
+    }
+
+    ///Return a new Decimal after shortening the digits and rounding
+    ///```rust
+    /// use rbdc::{Decimal, RoundingMode};
+    /// let n: Decimal = "129.41675".parse().unwrap();
+    /// assert_eq!(n.with_scale_round(2, RoundingMode::Up),  "129.42".parse().unwrap());
+    /// assert_eq!(n.with_scale_round(-1, RoundingMode::Down),  "120".parse().unwrap());
+    /// assert_eq!(n.with_scale_round(4, RoundingMode::HalfEven),  "129.4168".parse().unwrap());
+    /// ```
+    pub fn with_scale_round(&self, new_scale: i64, mode: RoundingMode) -> Self {
+        Decimal(self.0.with_scale_round(new_scale, mode))
     }
 }
 
