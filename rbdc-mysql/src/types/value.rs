@@ -10,7 +10,7 @@ use crate::types::json::{decode_json, encode_json};
 use crate::types::set::Set;
 use crate::types::year::Year;
 use crate::types::{Decode, Encode, TypeInfo};
-use crate::value::MySqlValue;
+use crate::value::{MySqlValue, MySqlValueFormat};
 use rbdc::date::Date;
 use rbdc::datetime::DateTime;
 use rbdc::decimal::Decimal;
@@ -120,20 +120,23 @@ impl Encode for Value {
                     //year = "1993"
                     "Year" => Year(v.as_u64().unwrap_or_default() as u16).encode(buf),
                     //Date = "1993-02-06"
-                    "Date" => Date(fastdate::Date::from_str(
-                        &v.into_string().unwrap_or_default(),
-                    ).map_err(|e|Error::from(e.to_string()))?)
+                    "Date" => Date(
+                        fastdate::Date::from_str(&v.into_string().unwrap_or_default())
+                            .map_err(|e| Error::from(e.to_string()))?,
+                    )
                     .encode(buf),
                     //RFC3339NanoTime = "15:04:05.999999999"
-                    "Time" => Time(fastdate::Time::from_str(
-                        &v.into_string().unwrap_or_default(),
-                    ).map_err(|e|Error::from(e.to_string()))?)
+                    "Time" => Time(
+                        fastdate::Time::from_str(&v.into_string().unwrap_or_default())
+                            .map_err(|e| Error::from(e.to_string()))?,
+                    )
                     .encode(buf),
                     //RFC3339 = "2006-01-02 15:04:05.999999"
                     "Timestamp" => Timestamp(v.as_i64().unwrap_or_default()).encode(buf),
-                    "DateTime" => DateTime(fastdate::DateTime::from_str(
-                        &v.into_string().unwrap_or_default(),
-                    ).map_err(|e|Error::from(e.to_string()))?)
+                    "DateTime" => DateTime(
+                        fastdate::DateTime::from_str(&v.into_string().unwrap_or_default())
+                            .map_err(|e| Error::from(e.to_string()))?,
+                    )
                     .encode(buf),
                     "Json" => {
                         let json_str = v.into_string().unwrap_or_default();
@@ -156,7 +159,11 @@ impl Decode for Value {
     where
         Self: Sized,
     {
-        Ok(match v.type_info().r#type {
+        let mut type_info = v.type_info().r#type;
+        if v.format == MySqlValueFormat::Text {
+            type_info = ColumnType::String;
+        }
+        Ok(match type_info {
             ColumnType::Tiny => Value::I32(int_decode(v).unwrap_or_default() as i32),
             ColumnType::Short => Value::I32(int_decode(v).unwrap_or_default() as i32),
             ColumnType::Long => Value::I64(int_decode(v).unwrap_or_default()),
@@ -177,7 +184,8 @@ impl Decode for Value {
                 "Timestamp",
                 Box::new(Value::U64({
                     let s = decode_timestamp(v).unwrap_or_default();
-                    let date = fastdate::DateTime::from_str(&s).map_err(|e|Error::from(e.to_string()))?;
+                    let date =
+                        fastdate::DateTime::from_str(&s).map_err(|e| Error::from(e.to_string()))?;
                     date.unix_timestamp_millis() as u64
                 })),
             ),

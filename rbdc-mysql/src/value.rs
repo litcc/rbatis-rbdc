@@ -6,7 +6,7 @@ use std::str::from_utf8;
 use std::sync::Arc;
 use crate::options::MySqlConnectOptions;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy,Eq,PartialEq)]
 #[repr(u8)]
 pub enum MySqlValueFormat {
     Text,
