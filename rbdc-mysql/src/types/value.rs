@@ -160,7 +160,7 @@ impl Decode for Value {
         Self: Sized,
     {
         let mut type_info = v.type_info().r#type;
-        if v.format == MySqlValueFormat::Text {
+        if type_info == ColumnType::Blob && v.format == MySqlValueFormat::Text {
             type_info = ColumnType::String;
         }
         Ok(match type_info {
