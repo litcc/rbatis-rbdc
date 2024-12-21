@@ -225,16 +225,7 @@ impl Decode for Value {
                     }
                 })),
             ),
-            PgType::Bpchar => Value::Ext(
-                "Bpchar",
-                Box::new(Value::Binary({
-                    match arg.format() {
-                        PgValueFormat::Binary => arg.as_bytes()?.to_owned(),
-                        PgValueFormat::Text => arg.as_str()?.as_bytes().to_vec(),
-                    }
-                })),
-            ),
-            PgType::Varchar => Value::String(Decode::decode(arg)?),
+            PgType::Bpchar | PgType::Varchar => Value::String(Decode::decode(arg)?),
             PgType::Date => {
                 let v: Date = Decode::decode(arg)?;
                 v
