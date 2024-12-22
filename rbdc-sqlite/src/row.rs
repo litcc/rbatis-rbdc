@@ -38,10 +38,9 @@ impl SqliteRow {
         let size = statement.column_count();
         let mut values = Vec::with_capacity(size);
 
-        for i in 0..size {
+        for i in 0..columns.len() {
             values.push(unsafe {
                 let raw = statement.column_value(i);
-
                 SqliteValue::new(raw, columns[i].type_info.clone())
             });
         }
