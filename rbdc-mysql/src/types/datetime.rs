@@ -37,7 +37,7 @@ impl Encode for DateTime {
                 }
             }
             let after_len = buf.len();
-            size += (after_len - before_len);
+            size += after_len - before_len;
         }
         Ok(1 + size)
     }

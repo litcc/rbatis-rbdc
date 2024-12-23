@@ -10,7 +10,7 @@ use crate::types::json::{decode_json, encode_json};
 use crate::types::set::Set;
 use crate::types::year::Year;
 use crate::types::{Decode, Encode, TypeInfo};
-use crate::value::{MySqlValue, MySqlValueFormat};
+use crate::value::{MySqlValue};
 use rbdc::date::Date;
 use rbdc::datetime::DateTime;
 use rbdc::decimal::Decimal;
@@ -159,7 +159,7 @@ impl Decode for Value {
     where
         Self: Sized,
     {
-        let mut type_info = v.type_info().r#type;
+        let type_info = v.type_info().r#type;
         Ok(match type_info {
             ColumnType::Tiny => Value::I32(int_decode(v).unwrap_or_default() as i32),
             ColumnType::Short => Value::I32(int_decode(v).unwrap_or_default() as i32),
