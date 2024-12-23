@@ -1,10 +1,10 @@
+use crate::types::{Decode, Encode};
+use crate::value::{MySqlValue, MySqlValueFormat};
+use byteorder::{ByteOrder, LittleEndian};
 use bytes::Buf;
 use rbdc::types::time::Time;
 use rbdc::Error;
 use std::str::FromStr;
-
-use crate::types::{Decode, Encode};
-use crate::value::{MySqlValue, MySqlValueFormat};
 
 impl Encode for Time {
     fn encode(self, buf: &mut Vec<u8>) -> Result<usize, Error> {
@@ -85,7 +85,8 @@ fn encode_time(time: &fastdate::Time, include_micros: bool, buf: &mut Vec<u8>) {
     buf.push(time.get_sec());
 
     if include_micros {
-        buf.extend(&(time.get_nano() / 1000).to_le_bytes());
+         let micro=time.get_nano() / 1000;
+         buf.extend(&micro.to_le_bytes());
     }
 }
 
