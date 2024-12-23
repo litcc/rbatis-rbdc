@@ -51,7 +51,7 @@ impl Decode for Timestamp {
                 let len = buf[0];
                 let date = decode_date_buf(&buf[1..])?;
                 let time = if len > 4 {
-                    decode_time(len - 4, &buf[5..])
+                    decode_time( &buf[5..])
                 } else {
                     fastdate::Time {
                         nano: 0,
