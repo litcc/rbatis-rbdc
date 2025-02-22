@@ -123,10 +123,8 @@ impl<'de> serde::Deserialize<'de> for Decimal {
         D: Deserializer<'de>,
     {
         use serde::de::Error;
-        match Value::deserialize(deserializer)?.into_string() {
-            None => Err(D::Error::custom("warn type decode Decimal")),
-            Some(v) => Ok(Decimal::from_str(&v).map_err(|e| D::Error::custom(e.to_string())))?,
-        }
+        let v=Value::deserialize(deserializer)?.to_string();
+        Decimal::from_str(&v).map_err(|e| Error::custom(e.to_string()))
     }
 }
 
@@ -456,5 +454,12 @@ mod test {
         let v = Decimal::new("1.123456").unwrap();
         println!("{}", v.fractional_digit_count());
         assert_eq!(v.fractional_digit_count(), 6);
+    }
+
+    #[test]
+    fn test_de(){
+        let v = serde_json::to_value(1).unwrap();
+        let s:Decimal = serde_json::from_value(v).unwrap();
+        assert_eq!(s, Decimal::from(1));
     }
 }
