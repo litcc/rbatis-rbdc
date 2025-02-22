@@ -123,8 +123,15 @@ impl<'de> serde::Deserialize<'de> for Decimal {
         D: Deserializer<'de>,
     {
         use serde::de::Error;
-        let v=Value::deserialize(deserializer)?.to_string();
-        Decimal::from_str(&v).map_err(|e| Error::custom(e.to_string()))
+        let v = Value::deserialize(deserializer)?;
+        let string = match v {
+            Value::String(v)=>{
+                v
+            }
+            Value::Ext(_, inner_value) => inner_value.to_string(),
+            _ => v.to_string(),
+        };
+        Decimal::from_str(&string).map_err(|e| Error::custom(e.to_string()))
     }
 }
 
@@ -457,9 +464,9 @@ mod test {
     }
 
     #[test]
-    fn test_de(){
+    fn test_de() {
         let v = serde_json::to_value(1).unwrap();
-        let s:Decimal = serde_json::from_value(v).unwrap();
+        let s: Decimal = serde_json::from_value(v).unwrap();
         assert_eq!(s, Decimal::from(1));
     }
 }
