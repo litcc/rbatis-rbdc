@@ -20,7 +20,7 @@ pub struct FastPool {
 #[derive(Debug)]
 pub struct ConnManagerProxy {
     inner: ConnManager,
-    conn: Option<fast_pool::ConnectionBox<ConnManagerProxy>>,
+    conn: Option<fast_pool::ConnectionGuard<ConnManagerProxy>>,
 }
 
 impl From<ConnManager> for ConnManagerProxy {
@@ -107,6 +107,7 @@ impl Pool for FastPool {
         m.insert("in_use".to_string().into(), state.in_use.into());
         m.insert("idle".to_string().into(), state.idle.into());
         m.insert("waits".to_string().into(), state.waits.into());
+        m.insert("connecting".to_string().into(), state.connecting.into());
         Value::Map(m)
     }
 }
