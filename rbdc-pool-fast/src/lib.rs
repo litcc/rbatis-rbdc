@@ -108,6 +108,7 @@ impl Pool for FastPool {
         m.insert("idle".to_string().into(), state.idle.into());
         m.insert("waits".to_string().into(), state.waits.into());
         m.insert("connecting".to_string().into(), state.connecting.into());
+        m.insert("checking".to_string().into(), state.checking.into());
         Value::Map(m)
     }
 }
