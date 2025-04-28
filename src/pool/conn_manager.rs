@@ -18,7 +18,9 @@ impl ConnManager {
         T: Future + Send + 'static,
         T::Output: Send + 'static,
     {
-        tokio::spawn(task);
+        if let Ok(handle) = tokio::runtime::Handle::try_current() {
+            handle.spawn(task);
+        }
     }
 
     pub fn new<D: Driver + 'static>(driver: D, url: &str) -> Result<Self, Error> {
