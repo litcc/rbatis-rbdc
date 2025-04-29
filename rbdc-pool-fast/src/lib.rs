@@ -2,7 +2,7 @@ use dark_std::sync::AtomicDuration;
 use futures_core::future::BoxFuture;
 use log::info;
 use rbdc::db::{Connection, ExecResult, Row};
-use rbdc::pool::conn_box::ConnectionBox;
+use rbdc::pool::conn_box::ConnectionGuard;
 use rbdc::pool::conn_manager::ConnManager;
 use rbdc::pool::Pool;
 use rbdc::Error;
@@ -114,7 +114,7 @@ impl Pool for FastPool {
 }
 
 impl fast_pool::Manager for ConnManagerProxy {
-    type Connection = ConnectionBox;
+    type Connection = ConnectionGuard;
     type Error = Error;
 
     async fn connect(&self) -> Result<Self::Connection, Self::Error> {

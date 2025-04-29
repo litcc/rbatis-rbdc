@@ -2,13 +2,16 @@ use crate::db::Connection;
 use crate::pool::conn_manager::ConnManager;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
+use std::time::Duration;
 
-pub struct ConnectionBox {
+/// ConnectionBox is a wrapper for a database connection make sure auto_close.
+pub struct ConnectionGuard {
     pub conn: Option<Box<dyn Connection>>,
     pub manager_proxy: ConnManager,
-    pub auto_close: bool,
+    pub auto_close: Option<Duration>,
 }
-impl Debug for ConnectionBox {
+
+impl Debug for ConnectionGuard {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ConnectionBox")
             .field("manager_proxy", &self.manager_proxy)
@@ -17,8 +20,8 @@ impl Debug for ConnectionBox {
     }
 }
 
-unsafe impl Sync for ConnectionBox {}
-impl Deref for ConnectionBox {
+unsafe impl Sync for ConnectionGuard {}
+impl Deref for ConnectionGuard {
     type Target = Box<dyn Connection>;
 
     fn deref(&self) -> &Self::Target {
@@ -26,18 +29,18 @@ impl Deref for ConnectionBox {
     }
 }
 
-impl DerefMut for ConnectionBox {
+impl DerefMut for ConnectionGuard {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.conn.as_mut().unwrap()
     }
 }
 
-impl Drop for ConnectionBox {
+impl Drop for ConnectionGuard {
     fn drop(&mut self) {
-        if self.auto_close {
+        if let Some(auto_close) = self.auto_close {
             if let Some(mut conn) = self.conn.take() {
                 self.manager_proxy.spawn_task(async move {
-                    let _ = conn.close().await;
+                    let _ = tokio::time::timeout(auto_close, conn.close()).await;
                 });
             }
         }

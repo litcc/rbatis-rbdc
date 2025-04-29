@@ -1,9 +1,10 @@
 use crate::db::{ConnectOptions, Driver};
-use crate::pool::conn_box::ConnectionBox;
+use crate::pool::conn_box::ConnectionGuard;
 use crate::Error;
 use std::future::Future;
 use std::ops::Deref;
 use std::sync::Arc;
+use std::time::Duration;
 
 #[derive(Clone, Debug)]
 pub struct ConnManager {
@@ -56,18 +57,18 @@ impl ConnManager {
         self.driver.name()
     }
 
-    pub async fn connect(&self) -> Result<ConnectionBox, Error> {
-        Ok(ConnectionBox {
+    pub async fn connect(&self) -> Result<ConnectionGuard, Error> {
+        Ok(ConnectionGuard {
             conn: Some(self.driver.connect_opt(self.option.deref().deref()).await?),
             manager_proxy: self.clone(),
-            auto_close: true,
+            auto_close: Some(Duration::from_secs(10)),
         })
     }
 
-    pub async fn check(&self, conn: &mut ConnectionBox) -> Result<(), Error> {
-        return match conn.ping().await {
+    pub async fn check(&self, conn: &mut ConnectionGuard) -> Result<(), Error> {
+        match conn.ping().await {
             Ok(_) => Ok(()),
             Err(e) => Err(e),
-        };
+        }
     }
 }
