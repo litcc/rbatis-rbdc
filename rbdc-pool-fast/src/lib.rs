@@ -2,8 +2,8 @@ use dark_std::sync::AtomicDuration;
 use futures_core::future::BoxFuture;
 use log::info;
 use rbdc::db::{Connection, ExecResult, Row};
-use rbdc::pool::conn_guard::ConnectionGuard;
-use rbdc::pool::conn_manager::ConnManager;
+use rbdc::pool::ConnectionGuard;
+use rbdc::pool::ConnectionManager;
 use rbdc::pool::Pool;
 use rbdc::Error;
 use rbs::value::map::ValueMap;
@@ -19,12 +19,12 @@ pub struct FastPool {
 
 #[derive(Debug)]
 pub struct ConnManagerProxy {
-    inner: ConnManager,
+    inner: ConnectionManager,
     conn: Option<fast_pool::ConnectionGuard<ConnManagerProxy>>,
 }
 
-impl From<ConnManager> for ConnManagerProxy {
-    fn from(value: ConnManager) -> Self {
+impl From<ConnectionManager> for ConnManagerProxy {
+    fn from(value: ConnectionManager) -> Self {
         ConnManagerProxy {
             inner: value,
             conn: None,
@@ -34,7 +34,7 @@ impl From<ConnManager> for ConnManagerProxy {
 
 #[async_trait::async_trait]
 impl Pool for FastPool {
-    fn new(manager: ConnManager) -> Result<Self, Error>
+    fn new(manager: ConnectionManager) -> Result<Self, Error>
     where
         Self: Sized,
     {
@@ -202,7 +202,7 @@ mod test {
     use crate::FastPool;
     use futures_core::future::BoxFuture;
     use rbdc::db::{ConnectOptions, Connection, Driver, ExecResult, Row};
-    use rbdc::pool::conn_manager::ConnManager;
+    use rbdc::pool::ConnectionManager;
     use rbdc::pool::Pool;
     use rbs::{Error, Value};
 
@@ -272,7 +272,7 @@ mod test {
 
     #[test]
     fn test() {
-        let pool = Box::new(FastPool::new(ConnManager::new(D {}, "").unwrap()));
+        let pool = Box::new(FastPool::new(ConnectionManager::new(D {}, "").unwrap()));
         println!("ok={}", pool.is_ok());
     }
 }

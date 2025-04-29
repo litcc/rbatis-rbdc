@@ -1,5 +1,5 @@
 use crate::db::Connection;
-use crate::pool::conn_manager::ConnManager;
+use crate::pool::manager::ConnectionManager;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::time::Duration;
@@ -7,7 +7,7 @@ use std::time::Duration;
 /// ConnectionGuard is a wrapper for a database connection make sure auto_close.
 pub struct ConnectionGuard {
     pub conn: Option<Box<dyn Connection>>,
-    pub manager_proxy: ConnManager,
+    pub manager_proxy: ConnectionManager,
     pub auto_close: Option<Duration>,
 }
 

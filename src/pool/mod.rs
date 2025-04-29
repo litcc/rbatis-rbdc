@@ -1,8 +1,9 @@
-pub mod conn_guard;
-pub mod conn_manager;
+mod guard;
+mod manager;
+pub use guard::ConnectionGuard;
+pub use manager::ConnectionManager;
 
 use crate::db::Connection;
-use crate::pool::conn_manager::ConnManager;
 use crate::Error;
 use async_trait::async_trait;
 use rbs::Value;
@@ -12,7 +13,7 @@ use std::time::Duration;
 #[async_trait]
 pub trait Pool: Sync + Send + Debug {
     /// create an Pool,use ConnManager
-    fn new(manager: ConnManager) -> Result<Self, Error>
+    fn new(manager: ConnectionManager) -> Result<Self, Error>
     where
         Self: Sized;
 

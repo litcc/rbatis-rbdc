@@ -34,7 +34,7 @@ impl Placeholder for YourPlaceholder{}
 use rbdc_sqlite::SqliteDriver;
 use rbdc::db::{Connection};
 use rbdc::Error;
-use rbdc::pool::conn_manager::ConnManager;
+use rbdc::pool::ConnManager;
 use rbdc::pool::Pool;
 use rbdc_pool_fast::FastPool;
 

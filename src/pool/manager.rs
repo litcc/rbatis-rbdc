@@ -1,5 +1,5 @@
 use crate::db::{ConnectOptions, Driver};
-use crate::pool::conn_guard::ConnectionGuard;
+use crate::pool::guard::ConnectionGuard;
 use crate::Error;
 use std::future::Future;
 use std::ops::Deref;
@@ -7,12 +7,12 @@ use std::sync::Arc;
 use std::time::Duration;
 
 #[derive(Clone, Debug)]
-pub struct ConnManager {
+pub struct ConnectionManager {
     pub driver: Arc<Box<dyn Driver>>,
     pub option: Arc<Box<dyn ConnectOptions>>,
 }
 
-impl ConnManager {
+impl ConnectionManager {
     /// spawn task on runtime
     pub fn spawn_task<T>(&self, task: T)
     where
