@@ -2,7 +2,7 @@ use dark_std::sync::AtomicDuration;
 use futures_core::future::BoxFuture;
 use log::info;
 use rbdc::db::{Connection, ExecResult, Row};
-use rbdc::pool::conn_box::ConnectionGuard;
+use rbdc::pool::conn_guard::ConnectionGuard;
 use rbdc::pool::conn_manager::ConnManager;
 use rbdc::pool::Pool;
 use rbdc::Error;

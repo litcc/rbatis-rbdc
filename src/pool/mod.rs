@@ -1,4 +1,4 @@
-pub mod conn_box;
+pub mod conn_guard;
 pub mod conn_manager;
 
 use crate::db::Connection;

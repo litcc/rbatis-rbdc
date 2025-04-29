@@ -1,5 +1,5 @@
 use crate::db::{ConnectOptions, Driver};
-use crate::pool::conn_box::ConnectionGuard;
+use crate::pool::conn_guard::ConnectionGuard;
 use crate::Error;
 use std::future::Future;
 use std::ops::Deref;
