@@ -4,7 +4,7 @@ use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::time::Duration;
 
-/// ConnectionBox is a wrapper for a database connection make sure auto_close.
+/// ConnectionGuard is a wrapper for a database connection make sure auto_close.
 pub struct ConnectionGuard {
     pub conn: Option<Box<dyn Connection>>,
     pub manager_proxy: ConnManager,
