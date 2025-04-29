@@ -20,7 +20,6 @@ impl Debug for ConnectionGuard {
     }
 }
 
-unsafe impl Sync for ConnectionGuard {}
 impl Deref for ConnectionGuard {
     type Target = Box<dyn Connection>;
 
