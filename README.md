@@ -28,6 +28,7 @@ impl Placeholder for YourPlaceholder{}
 ```
 
 ### how to use my driver?
+* more [examples](example)
 * for sqlite example
 ```rust
 use rbdc_sqlite::SqliteDriver;
