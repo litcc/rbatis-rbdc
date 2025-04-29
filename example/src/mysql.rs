@@ -1,5 +1,3 @@
-mod mssql;
-
 use rbdc::db::{Connection};
 use rbdc::Error;
 use rbdc::pool::conn_manager::ConnManager;
