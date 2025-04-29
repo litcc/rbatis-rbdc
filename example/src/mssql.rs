@@ -9,11 +9,9 @@ async fn main(){
     // let pool = Pool::new_url(MssqlDriver {}, "jdbc:sqlserver://SA:TestPass!123456@localhost:1433;database=test").unwrap();
     let pool = FastPool::new(ConnManager::new(MssqlDriver {}, uri).unwrap()).unwrap();
     let mut conn = pool.get().await.unwrap();
-    let data = conn
+    let v = conn
         .get_values("SELECT 1", vec![])
         .await
         .unwrap();
-    for x in data {
-        println!("row: {}", x);
-    }
+    println!("{}", rbs::Value::Array(v));
 }

@@ -15,12 +15,16 @@ path = "src/mssql.rs"
 [[bin]]
 name = "mysql"
 path = "src/mysql.rs"
+[[bin]]
+name = "pg"
+path = "src/pg.rs"
 [dependencies]
 rbs = "4.5"
 rbdc = {version = "4.5",path = "../"}
 rbdc-sqlite = {version = "4.5",path = "../rbdc-sqlite"}
 rbdc-mssql = {version = "4.5",path = "../rbdc-mssql"}
 rbdc-mysql = {version = "4.5",path = "../rbdc-mysql"}
+rbdc-pg = {version = "4.5",path = "../rbdc-pg"}
 rbdc-pool-fast = {version = "4.5",path = "../rbdc-pool-fast"}
 tokio = { version = "1", features = ["sync", "fs", "net", "rt", "rt-multi-thread", "time", "io-util", "macros"] }
 
