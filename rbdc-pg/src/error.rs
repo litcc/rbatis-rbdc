@@ -158,3 +158,16 @@ impl Display for PgDatabaseError {
 }
 
 impl Error for PgDatabaseError {}
+
+
+impl From<Notice> for PgDatabaseError {
+    fn from(notice: Notice) -> Self {
+        PgDatabaseError(notice)
+    }
+}
+
+impl From<PgDatabaseError> for rbs::Error {
+    fn from(err: PgDatabaseError) -> Self {
+        rbs::Error::from(format!("{}:{}",err.code(), err.message()))
+    }
+}

@@ -13,6 +13,7 @@ use crate::options::PgConnectOptions;
 use rbdc::error::Error;
 use rbdc::io::{BufStream, Decode, Encode};
 use rbdc::net::{MaybeTlsStream, Socket};
+use crate::error::PgDatabaseError;
 // the stream is a separate type from the connection to uphold the invariant where an instantiated
 // [PgConnection] is a **valid** connection to postgres
 
@@ -101,7 +102,7 @@ impl PgStream {
                 MessageFormat::ErrorResponse => {
                     // An error returned from the database server.
                     let notice = message.decode::<Notice>()?;
-                    return Err(Error::from(format!("db:code={},message={}", notice.code(), notice.message())));
+                    return Err(PgDatabaseError::from(notice).into());
                 }
 
                 MessageFormat::NotificationResponse => {
