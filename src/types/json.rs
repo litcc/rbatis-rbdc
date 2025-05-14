@@ -3,6 +3,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::de::Error;
 
 /// support deserialize JsonStruct or json string
 /// for example:
@@ -63,7 +64,7 @@ impl<'de> serde::Deserialize<'de> for Json {
     where
         D: Deserializer<'de>,
     {
-        Ok(Json::from(Value::deserialize(deserializer)?))
+        Ok(Json(serde_json::Value::deserialize(deserializer).map_err(|e| Error::custom(e))?.to_string()))
     }
 }
 
