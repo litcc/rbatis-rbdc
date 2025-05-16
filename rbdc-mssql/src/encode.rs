@@ -51,8 +51,16 @@ impl Encode for Value {
                 q.bind(v);
                 Ok(())
             }
-            Value::Array(_) => Err(Error::from("unimplemented")),
-            Value::Map(_) => Err(Error::from("unimplemented")),
+            Value::Array(_) => {
+                //json
+                q.bind(self.to_string().as_bytes());
+                Ok(())
+            },
+            Value::Map(_) => {
+                //json
+                q.bind(self.to_string().as_bytes());
+                Ok(())
+            },
             Value::Ext(t, v) => match t {
                 "Date" => {
                     q.bind(
