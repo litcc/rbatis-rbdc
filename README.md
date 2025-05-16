@@ -42,8 +42,12 @@ use rbdc_pool_fast::FastPool;
 async fn main() -> Result<(), Error> {
     let pool = FastPool::new(ConnManager::new(SqliteDriver {}, "sqlite://target/test.db")?)?;
     let mut conn = pool.get().await?;
+    // select
     let v = conn.get_values("select * from sqlite_master", vec![]).await?;
     println!("{}", rbs::Value::Array(v));
+    // update/delete
+    let r = conn.exec("update table set name='a' where id = 1", vec![]).await?;
+    println!("{}", r);
     Ok(())
 }
 
