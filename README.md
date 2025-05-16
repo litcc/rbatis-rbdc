@@ -1,6 +1,6 @@
 RBDC driver abstract
 
-* `rbdc` is safe code(`#[forbid(unsafe_code)]`)
+* `rbdc` is safe code(`#![forbid(unsafe_code)]`)
 * an database driver abstract for `rbatis`
 * supported database drivers see [rbatis](https://github.com/rbatis/rbatis)
 
