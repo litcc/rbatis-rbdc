@@ -53,12 +53,12 @@ impl Encode for Value {
             }
             Value::Array(_) => {
                 //json
-                q.bind(self.to_string().as_bytes());
+                q.bind(self.to_string().into_bytes());
                 Ok(())
             },
             Value::Map(_) => {
                 //json
-                q.bind(self.to_string().as_bytes());
+                q.bind(self.to_string().into_bytes());
                 Ok(())
             },
             Value::Ext(t, v) => match t {
