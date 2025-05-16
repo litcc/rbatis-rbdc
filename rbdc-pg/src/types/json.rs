@@ -52,7 +52,7 @@ impl Decode for Json {
             buf.remove(0);
         }
         Ok(Self {
-            0: unsafe { String::from_utf8_unchecked(buf) },
+            0: String::from_utf8_lossy(&buf).into_owned(),
         })
     }
 }
@@ -73,7 +73,7 @@ pub fn decode_json(value: PgValue) -> Result<Value, Error> {
         buf.remove(0);
     }
     Ok(
-        serde_json::from_str(&unsafe { String::from_utf8_unchecked(buf) })
+        serde_json::from_str(&String::from_utf8_lossy(&buf))
             .map_err(|e| Error::from(e.to_string()))?,
     )
 }

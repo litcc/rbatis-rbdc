@@ -106,7 +106,7 @@ impl From<Value> for Json {
                     Json(v)
                 }
             }
-            Value::Binary(v) => Json(unsafe { String::from_utf8_unchecked(v) }),
+            Value::Binary(v) => Json(String::from_utf8_lossy(&v).into_owned()),
             Value::Array(_) => Json(v.to_string()),
             Value::Map(v) => Json(v.to_string()),
             Value::Ext(_name, v) => Json::from(*v),

@@ -256,19 +256,11 @@ pub trait ConnectOptions: Any + Send + Sync + Debug + 'static {
 /// database driver ConnectOptions
 impl dyn ConnectOptions {
     pub fn downcast_ref<E: ConnectOptions>(&self) -> Option<&E> {
-        let v = unsafe {
-            //this is safe
-            std::mem::transmute_copy::<&dyn ConnectOptions, &E>(&self)
-        };
-        Some(v)
+        <dyn Any>::downcast_ref::<E>(self)
     }
 
     pub fn downcast_ref_mut<E: ConnectOptions>(&mut self) -> Option<&mut E> {
-        let v = unsafe {
-            //this is safe
-            std::mem::transmute_copy::<&mut dyn ConnectOptions, &mut E>(&self)
-        };
-        Some(v)
+        <dyn Any>::downcast_mut::<E>(self)
     }
 }
 
