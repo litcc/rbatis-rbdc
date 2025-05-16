@@ -52,3 +52,52 @@ async fn main() -> Result<(), Error> {
 }
 
 ```
+
+
+### FAQ
+
+#### How should I implement a driver for databases with blocking APIs?
+
+For database drivers with blocking APIs, follow the pattern in `rbdc-sqlite` using the `flume` channel library:
+
+```rust
+// Key components:
+// 1. Dedicated worker thread per connection
+// 2. Command channels for communication
+
+pub struct YourConnection {
+    worker: ConnectionWorker,
+}
+
+struct ConnectionWorker {
+    command_tx: flume::Sender<Command>,
+}
+
+enum Command {
+    Execute { /* ... */ },
+    Query { /* ... */ },
+}
+```
+
+Benefits:
+- Prevents blocking the async runtime
+- Provides thread safety
+- Maintains a clean async interface
+
+#### Why does `Connection` require both `Send` and `Sync`?
+
+`Connection: Send + Sync` is required because:
+
+1. **Thread Safety**: Connections may be shared across tasks on different threads when using Tokio
+2. **Pool Implementation**: Connection pools need thread-safe access to connections
+
+When implementing for non-thread-safe databases:
+
+```rust
+// SAFETY: YourConnection is thread-safe because:
+// 1. Database operations run on a dedicated worker thread
+// 2. Communication uses thread-safe channels
+unsafe impl Sync for YourConnection {}
+```
+
+Improper implementation can cause data races and undefined behavior.
