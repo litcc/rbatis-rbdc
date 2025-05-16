@@ -39,6 +39,16 @@ pub struct SqliteConnection {
     pub(crate) row_channel_size: usize,
 }
 
+// SAFETY: SqliteConnection is safe to share between threads because:
+// 1. The `worker` field is marked as `pub(crate)`, preventing external users from directly accessing it
+// 2. All SQLite operations are sent through thread-safe flume channels to a dedicated worker thread
+// 3. The `worker.handle_raw` pointer (raw SQLite connection) is encapsulated within the crate
+// 4. Any operation requiring direct access to the SQLite connection uses the `lock_handle()` method
+//    which acquires a mutex lock, ensuring synchronized access
+// 5. The only potentially unsafe method `as_raw_handle()` is marked as deprecated with warnings
+//    about thread safety and should be marked as `unsafe` to properly indicate its risks
+unsafe impl Sync for SqliteConnection {}
+
 pub struct LockedSqliteHandle<'a> {
     pub(crate) guard: MutexGuard<'a, ConnectionState>,
 }
@@ -75,7 +85,7 @@ impl SqliteConnection {
     /// You probably want to use [`.lock_handle()`][Self::lock_handle] to ensure that the worker thread is not using
     /// the database concurrently.
     #[deprecated(note = "Unsynchronized access is unsafe. See documentation for details.")]
-    pub fn as_raw_handle(&mut self) -> *mut sqlite3 {
+    pub unsafe fn as_raw_handle(&mut self) -> *mut sqlite3 {
         self.worker.handle_raw.as_ptr()
     }
 

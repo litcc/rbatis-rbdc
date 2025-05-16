@@ -82,7 +82,7 @@ impl From<(u64, Value)> for ExecResult {
 }
 
 /// Represents a connection to a database
-pub trait Connection: Send {
+pub trait Connection: Send+Sync {
     /// Execute a query that is expected to return a result set, such as a `SELECT` statement
     fn get_rows(
         &mut self,
