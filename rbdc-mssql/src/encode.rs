@@ -12,7 +12,7 @@ impl Encode for Value {
     fn encode(self, q: &mut Query) -> Result<(), Error> {
         match self {
             Value::Null => {
-                q.bind(Option::<String>::None);
+                q.bind(Option::<Vec<u8>>::None);
                 Ok(())
             }
             Value::Bool(v) => {
