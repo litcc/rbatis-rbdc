@@ -29,7 +29,7 @@ mod test {
         };
         let mut m = HashMap::new();
         m.insert(1, 2);
-        let v = rbs::to_value(a).unwrap();
+        let v = rbs::value(a).unwrap();
         println!("v: {}", v);
         let s: A = rbs::from_value(v).unwrap();
         println!("s:{:?}", s);
@@ -42,7 +42,7 @@ mod test {
         let arg = ExtStruct {
             0: "saasdfas".to_string(),
         };
-        let v = rbs::to_value(&arg).unwrap();
+        let v = rbs::value(&arg).unwrap();
         println!("{:?}", v);
 
         let ext: ExtStruct = rbs::from_value(v).unwrap();

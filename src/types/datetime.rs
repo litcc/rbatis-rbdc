@@ -394,7 +394,7 @@ mod test {
     #[test]
     fn test_de3() {
         let dt = vec![DateTime::from_str("2023-10-21T00:15:00.9233333+08:00").unwrap()];
-        let v = rbs::to_value!(&dt);
+        let v = rbs::value!(&dt);
         let new_dt: Vec<DateTime> = rbs::from_value(v).unwrap();
         assert_eq!(new_dt, dt);
     }
@@ -402,7 +402,7 @@ mod test {
     #[test]
     fn test_de4() {
         let dt = DateTime::from_str("2023-10-21T00:15:00.9233333+08:00").unwrap();
-        let v = rbs::to_value!(&dt.unix_timestamp_millis());
+        let v = rbs::value!(&dt.unix_timestamp_millis());
         let new_dt: DateTime = rbs::from_value(v).unwrap();
         assert_eq!(
             new_dt,

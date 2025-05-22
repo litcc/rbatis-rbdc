@@ -60,7 +60,7 @@ mod test {
 //     use rbdc::block_on;
 //     use rbdc::db::Driver;
 //     use rbdc::pool::Pool;
-//     use rbs::{to_value, Value};
+//     use rbs::{value, Value};
 //     use std::collections::BTreeMap;
 //
 //     #[test]

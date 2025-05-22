@@ -270,7 +270,7 @@ mod test {
     #[test]
     fn test_encode_jsonv() {
         let source: JsonV<String> = JsonV(1.to_string());
-        let v = rbs::to_value!(source);
+        let v = rbs::value!(source);
         let data = *v.as_ext().unwrap().1.clone();
         assert_eq!(data.into_string().unwrap_or_default(), "\"1\"");
     }

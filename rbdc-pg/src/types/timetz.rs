@@ -48,7 +48,7 @@ impl Display for Timetz {
 
 impl From<Timetz> for Value {
     fn from(arg: Timetz) -> Self {
-        rbs::to_value!(arg)
+        rbs::value!(arg)
     }
 }
 

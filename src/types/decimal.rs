@@ -356,7 +356,7 @@ impl SubAssign for Decimal {
 #[cfg(test)]
 mod test {
     use crate::decimal::Decimal;
-    use rbs::{from_value, to_value};
+    use rbs::{from_value, value};
     use std::str::FromStr;
 
     #[test]
@@ -394,7 +394,7 @@ mod test {
     #[test]
     fn test_ser() {
         let v1 = Decimal::from_str("1").unwrap();
-        let rv: Decimal = from_value(to_value!(v1)).unwrap();
+        let rv: Decimal = from_value(value!(v1)).unwrap();
         assert_eq!(rv, Decimal::from_str("1").unwrap());
     }
 
@@ -407,7 +407,7 @@ mod test {
 
     #[test]
     fn test_ser3() {
-        let v1 = to_value!("1.111");
+        let v1 = value!("1.111");
         let rv: Decimal = rbs::from_value(v1.clone()).unwrap();
         assert_eq!(rv, Decimal::from_str("1.111").unwrap());
     }

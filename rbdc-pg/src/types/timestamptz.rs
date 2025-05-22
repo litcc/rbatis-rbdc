@@ -10,7 +10,7 @@ mod test {
     #[test]
     fn test_de() {
         let tz = Timestamptz::now();
-        let v = rbs::to_value(&tz).unwrap();
+        let v = rbs::value(&tz).unwrap();
         println!("{:?}", v);
         let r: Timestamptz = rbs::from_value(v).unwrap();
         assert_eq!(r, tz);
