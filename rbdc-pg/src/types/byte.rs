@@ -8,18 +8,21 @@ use std::fmt::{Display, Formatter};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename = "Bytea")]
-pub struct Bytea(pub u8);
+pub struct Bytea(pub Vec<u8>);
 
 impl Display for Bytea {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        if self.0.len() > 10{
+            write!(f, "[{}]",self.0.len())
+        }else{
+            write!(f, "{:?}", &self.0)
+        }
     }
 }
 
 impl Encode for Bytea {
     fn encode(self, buf: &mut PgArgumentBuffer) -> Result<IsNull, Error> {
-        buf.push(self.0);
-        Ok(IsNull::No)
+        Encode::encode(self.0, buf)
     }
 }
 
@@ -27,14 +30,21 @@ impl Decode for Bytea {
     fn decode(value: PgValue) -> Result<Self, Error> {
         // note: in the TEXT encoding, a value of "0" here is encoded as an empty string
         Ok(Self(
-            value.as_bytes()?.get(0).copied().unwrap_or_default() as u8
+            Vec::<u8>::decode(value)?
         ))
     }
 }
 
 impl From<Bytea> for Value {
     fn from(arg: Bytea) -> Self {
-        Value::Ext("Bytea", Box::new(Value::U32(arg.0 as u32)))
+        Value::Ext("Bytea", Box::new(Value::Binary(arg.0)))
+    }
+}
+
+impl Encode for &[u8] {
+    fn encode(self, buf: &mut PgArgumentBuffer) -> Result<IsNull, Error> {
+        buf.extend_from_slice(self);
+        Ok(IsNull::No)
     }
 }
 

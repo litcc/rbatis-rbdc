@@ -2,7 +2,6 @@ use crate::arguments::PgArgumentBuffer;
 use crate::type_info::PgType;
 use crate::type_info::PgTypeInfo;
 use crate::type_info::PgTypeKind;
-use crate::types::byte::Bytea;
 use crate::types::decode::Decode;
 use crate::types::encode::{Encode, IsNull};
 use crate::types::json::{decode_json, encode_json};
@@ -110,7 +109,7 @@ impl Decode for Value {
         }
         Ok(match arg.type_info().0 {
             PgType::Bool => Value::Bool(Decode::decode(arg)?),
-            PgType::Bytea => Bytea::decode(arg)?.into(),
+            PgType::Bytea => Value::Binary(Vec::<u8>::decode(arg)?),//Vec<u8> is Bytea
             PgType::Char => Value::String(Decode::decode(arg)?),
             PgType::Name => Value::String(Decode::decode(arg)?),
             PgType::Int8 => Value::I64(Decode::decode(arg)?),
@@ -475,7 +474,7 @@ impl Encode for Value {
                         &v.into_string().unwrap_or_default(),
                     ).map_err(|e|Error::from(e.to_string()))?)
                     .encode(buf)?,
-                    "Bytea" => Bytea(v.as_u64().unwrap_or_default() as u8).encode(buf)?,
+                    "Bytea" => v.as_slice().unwrap_or_default().encode(buf)?,
                     "Char" => v.into_string().unwrap_or_default().encode(buf)?,
                     "Name" => v.into_string().unwrap_or_default().encode(buf)?,
                     "Int8" => (v.as_i64().unwrap_or_default() as i32).encode(buf)?,
