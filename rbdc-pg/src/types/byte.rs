@@ -12,11 +12,7 @@ pub struct Bytea(pub Vec<u8>);
 
 impl Display for Bytea {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.0.len() > 10{
-            write!(f, "[{}]",self.0.len())
-        }else{
-            write!(f, "{:?}", &self.0)
-        }
+        write!(f, "[len={}]", self.0.len())
     }
 }
 
