@@ -35,7 +35,7 @@ impl TypeInfo for Value {
             Value::F32(_) => PgTypeInfo::FLOAT4,
             Value::F64(_) => PgTypeInfo::FLOAT8,
             Value::String(_) => PgTypeInfo::VARCHAR,
-            Value::Binary(_) => PgTypeInfo::BYTEA_ARRAY,
+            Value::Binary(_) => PgTypeInfo::BYTEA,
             Value::Array(_) => PgTypeInfo::JSON,
             Value::Map(_) => PgTypeInfo::JSON,
             Value::Ext(type_name, _) => {

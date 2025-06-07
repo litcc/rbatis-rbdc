@@ -50,8 +50,18 @@ impl Decode for Vec<u8> {
         match value.format() {
             PgValueFormat::Binary => value.into_bytes(),
             PgValueFormat::Text => {
-                Err("unsupported decode to `&[u8]` of BYTEA in a simple query; use a prepared query or decode to `Vec<u8>`".into())
+                hex::decode(text_hex_decode_input(&value)?).map_err(|e| Error::from(e.to_string()))
             }
         }
     }
+}
+
+
+fn text_hex_decode_input(value: &PgValue) -> Result<&[u8], Error> {
+    // BYTEA is formatted as \x followed by hex characters
+    value
+        .as_bytes()?
+        .strip_prefix(b"\\x")
+        .ok_or("text does not start with \\x")
+        .map_err(Into::into)
 }
