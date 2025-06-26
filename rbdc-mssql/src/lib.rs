@@ -15,9 +15,11 @@ use rbdc::db::{ConnectOptions, Connection, ExecResult, MetaData, Placeholder, Ro
 use rbdc::Error;
 use rbs::Value;
 use std::sync::Arc;
-use tiberius::{Client, Column, ColumnData, Config, Query};
+use tiberius::{AuthMethod, Client, Column, ColumnData, Config, EncryptionLevel, Query};
 use tokio::net::TcpStream;
 use tokio_util::compat::{Compat, TokioAsyncWriteCompatExt};
+use url::Url;
+use percent_encoding::percent_decode_str;
 
 pub struct MssqlConnection {
     inner: Option<Client<Compat<TcpStream>>>,
@@ -52,17 +54,131 @@ impl ConnectOptions for MssqlConnectOptions {
     }
 
     fn set_uri(&mut self, url: &str) -> Result<(), Error> {
-        if url.contains("jdbc"){
+        if url.contains("jdbc") {
             let mut config = Config::from_jdbc_string(url).map_err(|e| Error::from(e.to_string()))?;
             config.trust_cert();
-            *self = MssqlConnectOptions(config);   
-        }else{
+            *self = MssqlConnectOptions(config);
+        } else if url.starts_with("mssql://") || url.starts_with("sqlserver://") {
+            let mut config = parse_url_connection_string(url)?;
+            config.trust_cert();
+            *self = MssqlConnectOptions(config);
+        } else {
             let mut config = Config::from_ado_string(url).map_err(|e| Error::from(e.to_string()))?;
             config.trust_cert();
             *self = MssqlConnectOptions(config);
         }
         Ok(())
     }
+}
+
+/// 解析 URL 格式的连接字符串 (mssql:// 或 sqlserver://)
+/// 格式: mssql://user:password@host:port/database?param1=value1&param2=value2
+/// 或: sqlserver://user:password@host:port/database?param1=value1&param2=value2
+///
+/// 支持的查询参数:
+/// - instance: SQL Server 实例名
+/// - application_name: 应用程序名称
+/// - encrypt: 加密级别 (true/false/DANGER_PLAINTEXT)
+/// - trust_cert: 是否信任服务器证书 (true/false)
+/// - readonly: 只读模式 (true/false)
+fn parse_url_connection_string(url: &str) -> Result<Config, Error> {
+    let parsed_url = Url::parse(url).map_err(|e| Error::from(e.to_string()))?;
+
+    let mut config = Config::new();
+
+    // 设置主机
+    if let Some(host) = parsed_url.host_str() {
+        config.host(host.to_string());
+    }
+
+    // 设置端口
+    if let Some(port) = parsed_url.port() {
+        config.port(port);
+    }
+
+    // 设置用户名和密码
+    let username = parsed_url.username();
+    if !username.is_empty() {
+        let decoded_username = percent_decode_str(username)
+            .decode_utf8()
+            .map_err(|e| Error::from(e.to_string()))?;
+
+        if let Some(password) = parsed_url.password() {
+            let decoded_password = percent_decode_str(password)
+                .decode_utf8()
+                .map_err(|e| Error::from(e.to_string()))?;
+            config.authentication(AuthMethod::sql_server(&decoded_username, &decoded_password));
+        } else {
+            config.authentication(AuthMethod::sql_server(&decoded_username, ""));
+        }
+    }
+
+    // 设置数据库
+    let path = parsed_url.path().trim_start_matches('/');
+    if !path.is_empty() {
+        config.database(path);
+    }
+
+    // 解析查询参数
+    for (key, value) in parsed_url.query_pairs() {
+        match key.to_lowercase().as_str() {
+            "instance" | "instance_name" => {
+                config.instance_name(&*value);
+            }
+            "application_name" | "applicationname" => {
+                config.application_name(&*value);
+            }
+            "encrypt" | "encryption" => {
+                match value.to_lowercase().as_str() {
+                    "true" | "yes" => {
+                        #[cfg(any(feature = "tls-rustls", feature = "tls-native-tls"))]
+                        config.encryption(EncryptionLevel::Required);
+                    }
+                    "false" | "no" => {
+                        #[cfg(any(feature = "tls-rustls", feature = "tls-native-tls"))]
+                        config.encryption(EncryptionLevel::Off);
+                    }
+                    "danger_plaintext" => {
+                        config.encryption(EncryptionLevel::NotSupported);
+                    }
+                    _ => {
+                        return Err(Error::from(format!("Invalid encryption value: {}", value)));
+                    }
+                }
+            }
+            "trust_cert" | "trustservercertificate" => {
+                match value.to_lowercase().as_str() {
+                    "true" | "yes" => {
+                        config.trust_cert();
+                    }
+                    "false" | "no" => {
+                        // 默认行为，不需要特殊处理
+                    }
+                    _ => {
+                        return Err(Error::from(format!("Invalid trust_cert value: {}", value)));
+                    }
+                }
+            }
+            "readonly" | "applicationintent" => {
+                match value.to_lowercase().as_str() {
+                    "true" | "yes" | "readonly" => {
+                        config.readonly(true);
+                    }
+                    "false" | "no" | "readwrite" => {
+                        config.readonly(false);
+                    }
+                    _ => {
+                        return Err(Error::from(format!("Invalid readonly value: {}", value)));
+                    }
+                }
+            }
+            _ => {
+                // 忽略未知参数
+            }
+        }
+    }
+
+    Ok(config)
 }
 
 #[derive(Debug)]
@@ -234,6 +350,84 @@ impl Connection for MssqlConnection {
 
 #[cfg(test)]
 mod test {
+    use crate::driver::MssqlDriver;
+    use crate::{MssqlConnectOptions, parse_url_connection_string};
+    use rbdc::db::{Driver, ConnectOptions};
+    use tiberius::Config;
+
     #[test]
     fn test_datetime() {}
+
+    #[test]
+    fn test_connection_string_parsing() {
+        // 测试 JDBC 格式
+        let jdbc_uri = "jdbc:sqlserver://localhost:1433;User=SA;Password={TestPass!123456};Database=master;";
+        let mut options = MssqlConnectOptions(Config::new());
+        let result = options.set_uri(jdbc_uri);
+        assert!(result.is_ok(), "JDBC format should be supported");
+
+        // 测试 mssql:// 格式
+        let mssql_uri = "mssql://SA:TestPass!123456@localhost:1433/master";
+        let mut options = MssqlConnectOptions(Config::new());
+        let result = options.set_uri(mssql_uri);
+        assert!(result.is_ok(), "mssql:// format should be supported: {:?}", result);
+
+        // 测试 sqlserver:// 格式
+        let sqlserver_uri = "sqlserver://SA:TestPass!123456@localhost:1433/master";
+        let mut options = MssqlConnectOptions(Config::new());
+        let result = options.set_uri(sqlserver_uri);
+        assert!(result.is_ok(), "sqlserver:// format should be supported: {:?}", result);
+
+        // 测试 ADO 格式
+        let ado_uri = "Server=localhost,1433;User Id=SA;Password=TestPass!123456;Database=master;";
+        let mut options = MssqlConnectOptions(Config::new());
+        let result = options.set_uri(ado_uri);
+        assert!(result.is_ok(), "ADO format should be supported");
+    }
+
+    #[test]
+    fn test_url_parsing_details() {
+        // 测试详细的 URL 解析
+        let config = parse_url_connection_string("mssql://testuser:testpass@example.com:1433/testdb").unwrap();
+        assert_eq!(config.get_addr(), "example.com:1433");
+
+        // 测试没有密码的情况
+        let config = parse_url_connection_string("mssql://testuser@localhost:1433/testdb").unwrap();
+        assert_eq!(config.get_addr(), "localhost:1433");
+
+        // 测试没有数据库的情况
+        let config = parse_url_connection_string("mssql://testuser:testpass@localhost:1433").unwrap();
+        assert_eq!(config.get_addr(), "localhost:1433");
+
+        // 测试默认端口
+        let config = parse_url_connection_string("mssql://testuser:testpass@localhost/testdb").unwrap();
+        assert_eq!(config.get_addr(), "localhost:1433");
+    }
+
+    #[test]
+    fn test_url_query_parameters() {
+        // 测试带查询参数的 URL
+        let config = parse_url_connection_string(
+            "mssql://testuser:testpass@localhost:1433/testdb?instance=SQLEXPRESS&application_name=MyApp&encrypt=true&trust_cert=true&readonly=true"
+        ).unwrap();
+        assert_eq!(config.get_addr(), "localhost:1433");
+
+        // 测试部分查询参数
+        let config = parse_url_connection_string(
+            "sqlserver://user:pass@server:1433/db?application_name=TestApp&encrypt=false"
+        ).unwrap();
+        assert_eq!(config.get_addr(), "server:1433");
+
+        // 测试无效的加密值应该返回错误
+        let result = parse_url_connection_string(
+            "mssql://user:pass@localhost/db?encrypt=invalid"
+        );
+        assert!(result.is_err());
+
+        // 测试无效的 trust_cert 值应该返回错误
+        let result = parse_url_connection_string(
+            "mssql://user:pass@localhost/db?trust_cert=invalid"
+        );
+        assert!(result.is_err());
+    }
 }

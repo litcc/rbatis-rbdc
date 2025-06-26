@@ -2,7 +2,7 @@
 name = "example"
 version = "0.1.0"
 authors = ["zhuxiujia <zhuxiujia@qq.com>"]
-edition = "2021"
+edition = "2024"
 publish = false
 
 
