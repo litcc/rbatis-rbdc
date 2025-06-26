@@ -71,32 +71,32 @@ impl ConnectOptions for MssqlConnectOptions {
     }
 }
 
-/// 解析 URL 格式的连接字符串 (mssql:// 或 sqlserver://)
-/// 格式: mssql://user:password@host:port/database?param1=value1&param2=value2
-/// 或: sqlserver://user:password@host:port/database?param1=value1&param2=value2
+/// Parse URL format connection string (mssql:// or sqlserver://)
+/// Format: mssql://user:password@host:port/database?param1=value1&param2=value2
+/// Or: sqlserver://user:password@host:port/database?param1=value1&param2=value2
 ///
-/// 支持的查询参数:
-/// - instance: SQL Server 实例名
-/// - application_name: 应用程序名称
-/// - encrypt: 加密级别 (true/false/DANGER_PLAINTEXT)
-/// - trust_cert: 是否信任服务器证书 (true/false)
-/// - readonly: 只读模式 (true/false)
+/// Supported query parameters:
+/// - instance: SQL Server instance name
+/// - application_name: Application name
+/// - encrypt: Encryption level (true/false/DANGER_PLAINTEXT)
+/// - trust_cert: Whether to trust server certificate (true/false)
+/// - readonly: Read-only mode (true/false)
 fn parse_url_connection_string(url: &str) -> Result<Config, Error> {
     let parsed_url = Url::parse(url).map_err(|e| Error::from(e.to_string()))?;
 
     let mut config = Config::new();
 
-    // 设置主机
+    // Set host
     if let Some(host) = parsed_url.host_str() {
         config.host(host.to_string());
     }
 
-    // 设置端口
+    // Set port
     if let Some(port) = parsed_url.port() {
         config.port(port);
     }
 
-    // 设置用户名和密码
+    // Set username and password
     let username = parsed_url.username();
     if !username.is_empty() {
         let decoded_username = percent_decode_str(username)
@@ -113,13 +113,13 @@ fn parse_url_connection_string(url: &str) -> Result<Config, Error> {
         }
     }
 
-    // 设置数据库
+    // Set database
     let path = parsed_url.path().trim_start_matches('/');
     if !path.is_empty() {
         config.database(path);
     }
 
-    // 解析查询参数
+    // Parse query parameters
     for (key, value) in parsed_url.query_pairs() {
         match key.to_lowercase().as_str() {
             "instance" | "instance_name" => {
@@ -152,7 +152,7 @@ fn parse_url_connection_string(url: &str) -> Result<Config, Error> {
                         config.trust_cert();
                     }
                     "false" | "no" => {
-                        // 默认行为，不需要特殊处理
+                        // Default behavior, no special handling needed
                     }
                     _ => {
                         return Err(Error::from(format!("Invalid trust_cert value: {}", value)));
@@ -173,7 +173,7 @@ fn parse_url_connection_string(url: &str) -> Result<Config, Error> {
                 }
             }
             _ => {
-                // 忽略未知参数
+                // Ignore unknown parameters
             }
         }
     }
