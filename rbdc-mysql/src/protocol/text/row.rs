@@ -25,6 +25,16 @@ impl<'de> Decode<'de, &'de [MySqlColumn]> for TextRow {
                 let size = buf.get_uint_lenenc() as usize;
                 let offset = offset - buf.len();
 
+                // bounds check to avoid panic when server returns non-MySQL-compliant payloads (e.g., ClickHouse MySQL compatibility layer)
+                if size > buf.len() {
+                    return Err(rbdc::Error::protocol(format!(
+                        "text row column length {} exceeds remaining {} bytes (first byte: 0x{:02x})",
+                        size,
+                        buf.len(),
+                        storage[offset] // original first byte of this value in storage snapshot
+                    )));
+                }
+
                 values.push(Some(offset..(offset + size)));
 
                 buf.advance(size);
