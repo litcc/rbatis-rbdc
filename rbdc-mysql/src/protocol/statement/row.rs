@@ -27,6 +27,13 @@ impl<'de> Decode<'de, &'de [MySqlColumn]> for BinaryRow {
         let offset = buf.len();
 
         let null_bitmap_len = (columns.len() + 9) / 8;
+        if buf.len() < null_bitmap_len {
+            return Err(err_protocol!(
+                "binary row: null-bitmap length {} exceeds remaining {} bytes",
+                null_bitmap_len,
+                buf.len()
+            ));
+        }
         let null_bitmap = buf.get_bytes(null_bitmap_len);
 
         let mut values = Vec::with_capacity(columns.len());
@@ -73,12 +80,21 @@ impl<'de> Decode<'de, &'de [MySqlColumn]> for BinaryRow {
                 | ColumnType::Date
                 | ColumnType::Datetime => {
                     // The size of this type is important for decoding
+                    if buf.is_empty() { return Err(err_protocol!("binary row: expected temporal length byte, found empty buffer")); }
                     buf[0] as usize + 1
                 }
 
                 // NOTE: MySQL will never generate NULL types for non-NULL values
                 ColumnType::Null => unreachable!(),
             };
+
+            if size > buf.len() {
+                return Err(err_protocol!(
+                    "binary row column length {} exceeds remaining {} bytes",
+                    size,
+                    buf.len()
+                ));
+            }
 
             let offset = offset - buf.len();
 
