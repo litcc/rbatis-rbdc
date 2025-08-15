@@ -5,6 +5,7 @@
 // invariants.
 #![allow(unsafe_code)]
 #![allow(dead_code)]
+#![allow(mismatched_lifetime_syntaxes)]
 
 pub use arguments::{SqliteArgumentValue, SqliteArguments};
 pub use column::SqliteColumn;

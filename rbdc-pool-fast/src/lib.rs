@@ -1,3 +1,5 @@
+#![allow(mismatched_lifetime_syntaxes)]
+
 use dark_std::sync::AtomicDuration;
 use futures_core::future::BoxFuture;
 use log::info;

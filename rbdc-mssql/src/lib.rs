@@ -1,3 +1,5 @@
+#![allow(mismatched_lifetime_syntaxes)]
+
 pub extern crate tiberius;
 
 pub mod decode;

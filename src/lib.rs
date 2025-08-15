@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
+#![allow(mismatched_lifetime_syntaxes)]
 
 pub mod common;
 pub use common::*;

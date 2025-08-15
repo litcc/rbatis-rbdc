@@ -1,4 +1,6 @@
 #![allow(dead_code)]
+#![allow(mismatched_lifetime_syntaxes)]
+
 pub mod arguments;
 pub mod column;
 pub mod connection;
