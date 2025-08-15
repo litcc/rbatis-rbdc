@@ -159,6 +159,8 @@ impl MySqlConnection {
                 // otherwise, this first packet is the start of the result-set metadata,
                 *self.stream.waiting.front_mut().unwrap() = Waiting::Row;
 
+                // column count as lenenc; guard against malformed packets
+                if packet.is_empty() { return Err(Error::protocol("empty packet when expecting column count".to_string())); }
                 let num_columns = packet.get_uint_lenenc() as usize; // column count
 
                 if needs_metadata {
